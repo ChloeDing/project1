@@ -1,0 +1,15 @@
+<!doctype html>
+
+<html lang="en">
+<% include _head %>
+<body>
+  <h1>
+  	<% if (age < 30) { %>
+  	hello <%= username.substring(0, 2) %>
+  	else
+  	<% } else {%>
+  	abc
+  	<% } %>
+  </h1>
+</body>
+</html>
