@@ -8,20 +8,28 @@ app.get('/', (req, res) => {
   res.send('Hello World')
 })
 
-app.get('/help', (req, res) => {
-  res.render("help", {
-  	username: "ding",
-  	age: 31
-  })
-})
-
-app.get('/:id', (req, res) => {
-  console.log(req)
-  console.log(req.params)
-  console.log(req.query)
-  res.status(200).send("help hello")
-})
-
 app.listen(PORT, () => {
 	console.log(`App is listening on PORT ${PORT}!`)
 })
+
+var urlDatabase = {
+  "b2xVn2": "http://www.lighthouselabs.ca",
+  "9sm5xK": "http://www.google.com"
+};
+
+app.get("/urls.json", (req, res) => {
+  res.json(urlDatabase);
+});
+
+app.get("/hello", (req, res) => {
+  res.send("<html><body>Hello <b>World</b></body></html>\n");
+});
+
+app.get("/urls", (req, res) => {
+  // let templateVars = { urls: urlDatabase };
+  res.render("urls_index", { urls: urlDatabase });
+});
+
+app.get("/urls/:id", (req, res) => {
+  res.render("urls_show", { shortURL: req.params.id });
+});
