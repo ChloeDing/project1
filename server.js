@@ -3,8 +3,10 @@ const qs = require('qs')
 const app = express()
 const PORT = 3000
 const bodyParser = require("body-parser")
+const cookieParser = require("cookie-parser")
 app.set("view engine", "ejs")
 app.use(bodyParser.urlencoded({extended: true}))
+app.use(cookieParser());
 
 app.get('/', (req, res) => {
   res.send('Hello World')
@@ -28,8 +30,11 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  // let templateVars = { urls: urlDatabase };
-  res.render("urls_index", { urls: urlDatabase });
+  let templateVars = {
+    username: req.cookies["username"],
+    urls: urlDatabase
+  };
+  res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
@@ -52,6 +57,17 @@ app.post("/urls/delete/:id", (req, res) => {
 
 app.get("/urls/:id", (req, res) => {
   res.render("urls_show", { shortURL: req.params.id, longURL: urlDatabase[req.params.id] });   
+});
+
+app.post("/login", (req, res) => {
+  let userName = req.body.username;
+  res.cookie("username", userName);
+  res.redirect("/urls");  
+});
+
+app.post("/logout", (req, res) => {
+  res.cookie("username", "");
+  res.redirect("/urls");  
 });
 
 app.post("/urls/:id", (req, res) => {
