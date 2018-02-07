@@ -8,6 +8,19 @@ app.set("view engine", "ejs")
 app.use(bodyParser.urlencoded({extended: true}))
 app.use(cookieParser());
 
+var users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+};
+
 app.get('/', (req, res) => {
   res.send('Hello World')
 })
@@ -31,7 +44,7 @@ app.get("/hello", (req, res) => {
 
 app.get("/urls", (req, res) => {
   let templateVars = {
-    username: req.cookies["username"],
+    user: users[req.cookies["user_id"]],
     urls: urlDatabase
   };
   res.render("urls_index", templateVars);
@@ -59,14 +72,31 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", { shortURL: req.params.id, longURL: urlDatabase[req.params.id] });   
 });
 
+app.get("/register", (req, res) => {
+  res.render("register");   
+});
+
+app.get("/login", (req, res) => {
+  res.render("register");   
+});
+
+app.get("/u/:shortURL", (req, res) => {
+  let longURL = urlDatabase[req.params.shortURL];
+  res.redirect(longURL);
+});
+
 app.post("/login", (req, res) => {
-  let userName = req.body.username;
-  res.cookie("username", userName);
-  res.redirect("/urls");  
+  let email = req.body.email;
+  for(var id in users) {
+    if (users[id].email === email) {
+      res.cookie("user_id", users[id].id);
+      res.redirect("/urls");
+    }
+  }
 });
 
 app.post("/logout", (req, res) => {
-  res.cookie("username", "");
+  res.cookie("user_id", "");
   res.redirect("/urls");  
 });
 
@@ -76,14 +106,28 @@ app.post("/urls/:id", (req, res) => {
   res.render("urls_index", { urls: urlDatabase });   
 });
 
-app.get("/u/:shortURL", (req, res) => {
-  let longURL = urlDatabase[req.params.shortURL];
-  res.redirect(longURL);
+app.post("/register", (req, res) => {
+  let email = req.body.email;
+  let password = req.body.password;
+  if(!email || !password) {
+    res.status(400).send('Email or Password is empty!');
+  }
+  let id = generateRandomString(5);
+  users[id] = {
+    "id": id,
+    "email": email,
+    "password": password
+  }
+  res.cookie("user_id", id);
+  res.redirect("/urls"); 
 });
 
-function generateRandomString() {
+function generateRandomString(size) {
   var text = "";
-  var size = 6;
+  if(!size) {
+    size = 6;
+  }
+
   var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
   for (var i = 0; i < size; i++)
